@@ -68,27 +68,18 @@ club-system-uploads/
 Thumbs.db
 .DS_Store
 
-# Documentation (keep only main READMEs)
+# Documentation (keep only README files)
 *.doc
 *.docx
 04*.doc
 软件工程*.docx
 
-# Development notes (optional - remove if you want to keep these)
-*修复说明*.md
-*开发完成*.md
-*测试指南*.md
-*交接文档*.md
-Dashboard*.md
-HomePage*.md
-Issue*.md
-Logo*.md
-Portal*.md
-Register*.md
-v0.*.md
-*功能*.md
-*总结*.md
-Course_Design*.md
-GEMINI.md
+# All markdown files except README.md
+*.md
+!README.md
+!club-system/README.md
+!club_web/README.md
+
+# Development notes and output
 nanobanana-output/
 技术文档.txt
