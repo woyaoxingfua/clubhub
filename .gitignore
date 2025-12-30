@@ -23,6 +23,7 @@ logs/
 # Database
 *.db
 *.sqlite
+*.sql
 
 # IDE
 .vscode/
