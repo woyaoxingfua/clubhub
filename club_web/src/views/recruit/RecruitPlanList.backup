@@ -1,0 +1,316 @@
+<template>
+  <div class="recruit-plan-container">
+    <div class="toolbar">
+      <div class="title-box">
+        <h2>📢 招新计划管理</h2>
+        <span class="sub-title">发布和管理社团的招新计划</span>
+      </div>
+      <!-- 管理员或社长可以发布计划 -->
+      <el-button v-if="canManage" type="primary" @click="openDialog()">
+        <el-icon style="margin-right: 5px"><Plus /></el-icon> 发布新计划
+      </el-button>
+    </div>
+
+    <el-table :data="tableData" v-loading="loading" border stripe style="width: 100%">
+      <el-table-column prop="planId" label="ID" width="60" align="center" />
+      <el-table-column prop="clubName" label="所属社团" min-width="120" />
+      <el-table-column prop="title" label="招新标题" min-width="150" />
+      <el-table-column prop="positions" label="招聘岗位" min-width="120" />
+      <el-table-column prop="startTime" label="发布时间" width="170">
+        <template #default="scope">
+          {{ formatTime(scope.row.startTime) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="100" align="center">
+        <template #default="scope">
+          <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">
+            {{ scope.row.status === 1 ? '进行中' : '已结束' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="240" align="center" fixed="right">
+        <template #default="scope">
+          
+          <!-- 管理员或该社团社长操作 -->
+          <template v-if="canManagePlan(scope.row)">
+            <el-button size="small" type="primary" link @click="openDialog(scope.row)">编辑</el-button>
+            <el-button size="small" type="danger" link @click="handleDelete(scope.row.planId)">删除</el-button>
+            <el-button size="small" type="success" link @click="$router.push(`/recruit/applications?planId=${scope.row.planId}`)">查看申请</el-button>
+          </template>
+
+          <!-- 普通学生操作 -->
+          <template v-else>
+            <el-button 
+              v-if="scope.row.status === 1" 
+              size="small" 
+              type="primary" 
+              @click="openApplyDialog(scope.row)"
+            >
+              申请加入
+            </el-button>
+            <span v-else style="color: #999; font-size: 12px">已结束</span>
+          </template>
+
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 管理员或社长：编辑/新增弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑计划' : '发布新计划'" width="500px">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="所属社团">
+          <el-select v-model="form.clubId" placeholder="请选择社团" style="width: 100%">
+            <!-- 管理员可以选择所有社团，社长只能选择自己管理的社团 -->
+            <el-option
+              v-for="item in (isAdmin ? clubList : myClubs)"
+              :key="item.clubId"
+              :label="item.clubName"
+              :value="item.clubId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标题">
+          <el-input v-model="form.title" placeholder="例如：2025秋季招新" />
+        </el-form-item>
+        <el-form-item label="岗位">
+          <el-input v-model="form.positions" placeholder="例如：技术部干事, 宣传部干事" />
+        </el-form-item>
+        <el-form-item label="要求">
+          <el-input v-model="form.requirements" type="textarea" :rows="3" placeholder="填写岗位要求..." />
+        </el-form-item>
+        <el-form-item label="状态" v-if="isEdit">
+          <el-radio-group v-model="form.status">
+            <el-radio :label="1">进行中</el-radio>
+            <el-radio :label="0">已结束</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 学生：申请弹窗 -->
+    <el-dialog v-model="applyDialogVisible" title="📝 填写申请信息" width="500px">
+      <div style="margin-bottom: 15px;">
+        <p>正在申请：<strong>{{ currentPlan.title }}</strong></p>
+      </div>
+      <el-form :model="applyForm" label-width="80px">
+        <el-form-item label="自我介绍">
+          <el-input 
+            v-model="applyForm.selfIntro" 
+            type="textarea" 
+            :rows="5" 
+            placeholder="请简单介绍一下你自己，以及你想加入的理由..." 
+          />
+        </el-form-item>
+        <!-- 暂时没有文件上传接口，先隐藏简历上传 -->
+      </el-form>
+      <template #footer>
+        <el-button @click="applyDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitApply">提交申请</el-button>
+      </template>
+    </el-dialog>
+
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, reactive, computed } from 'vue'
+import request from '@/utils/request'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+
+const loading = ref(false)
+const tableData = ref([])
+const clubList = ref([]) // 社团列表
+const myClubs = ref([]) // 我担任社长的社团列表
+const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+// 权限控制：管理员或者是某个社团的社长
+const isAdmin = computed(() => {
+  return user.roleKey === 'SYS_ADMIN' || user.roleKey === 'DEPT_ADMIN'
+})
+
+// 判断是否是社长（担任至少一个社团的社长）
+const isPresident = computed(() => {
+  return myClubs.value.length > 0
+})
+
+// 判断是否可以管理（管理员或社长）
+const canManage = computed(() => {
+  return isAdmin.value || isPresident.value
+})
+
+// 管理员弹窗相关
+const dialogVisible = ref(false)
+const isEdit = ref(false)
+const form = reactive({
+  planId: null,
+  clubId: null, 
+  title: '',
+  positions: '',
+  requirements: '',
+  status: 1
+})
+
+// 学生申请弹窗相关
+const applyDialogVisible = ref(false)
+const currentPlan = ref({})
+const applyForm = reactive({
+  selfIntro: ''
+})
+
+const loadData = () => {
+  loading.value = true
+  
+  const requests = [
+    request.get('/recruit/plan/list')
+  ]
+  
+  // 根据角色决定加载所有社团还是我的社团
+  if (user.roleKey === 'CLUB_ADMIN') {
+    requests.push(request.get('/club/my-clubs', { params: { userId: user.userId } }))
+  } else {
+    requests.push(request.get('/club/list'))
+  }
+
+  Promise.all(requests).then(([planRes, clubRes]) => {
+    tableData.value = planRes.data
+    clubList.value = clubRes.data || [] // 确保不为null
+    
+    // 可以在前端把 clubName 拼接到 plan 上，方便展示
+    // 注意：如果是社长，clubList只有自己社团，这里可能会导致其他社团的计划显示为'未知社团'
+    // 但作为社长，主要关注自己的。如果为了完美展示，应该分开加载：
+    // 1. 全量社团列表(用于展示Name) 2. 管理社团列表(用于Dropdown)
+    // 鉴于目前API限制，暂且这样。如果社长想看别的社团计划，只是Name显示不出而已，不影响功能。
+    // 更好的做法是后端 listPlans 返回时带上 clubName，或者前端缓存一份全量简易Map。
+    // 这里做一个补救：如果 clubList 里找不到，尝试保留原ID或显示未知
+    
+    const clubMap = new Map(clubList.value.map(c => [c.clubId, c.clubName]))
+    tableData.value.forEach(p => {
+      // 如果在当前加载的列表中找不到名字（比如社长只能拉到自己社团，但列表里有别的社团计划）
+      // 实际上后端 listPlans 目前返回所有。
+      // 这是一个小缺陷，但为了“发布”功能的正确性，优先保证 clubList 是我管理的社团。
+      p.clubName = clubMap.get(p.clubId) || (user.roleKey === 'CLUB_ADMIN' ? '其他社团' : '未知社团')
+      
+      // 对于社长，如果那是自己的社团，确保名字显示正确
+      if (clubMap.has(p.clubId)) {
+        p.clubName = clubMap.get(p.clubId)
+      }
+    })
+    
+  }).finally(() => loading.value = false)
+}
+
+const formatTime = (timeStr) => {
+  return timeStr ? timeStr.replace('T', ' ') : ''
+}
+
+// --- 管理员或社长操作 ---
+const openDialog = (row = null) => {
+  if (row) {
+    isEdit.value = true
+    Object.assign(form, row)
+  } else {
+    isEdit.value = false
+    form.planId = null
+    // 如果是社长且只有一个社团，默认选中
+    if (!isAdmin.value && myClubs.value.length === 1) {
+      form.clubId = myClubs.value[0].clubId
+    } else if (isAdmin.value && clubList.value.length > 0) {
+      form.clubId = null // 管理员需要手动选择
+    } else {
+      form.clubId = null
+    }
+    form.title = ''
+    form.positions = ''
+    form.requirements = ''
+    form.status = 1
+  }
+  dialogVisible.value = true
+}
+
+const handleSubmit = () => {
+  if (!form.clubId) {
+    ElMessage.warning('请选择所属社团')
+    return
+  }
+  const url = isEdit.value ? '/recruit/plan/update' : '/recruit/plan/add'
+  const method = isEdit.value ? 'put' : 'post'
+  request[method](url, form).then(res => {
+    ElMessage.success(res.msg)
+    dialogVisible.value = false
+    loadData()
+  })
+}
+
+const handleDelete = (id) => {
+  ElMessageBox.confirm('确定要删除该计划吗？', '提示', { type: 'warning' })
+    .then(() => {
+      request.delete(`/recruit/plan/${id}`).then(res => {
+        ElMessage.success('删除成功')
+        loadData()
+      })
+    })
+}
+
+// --- 学生操作 ---
+const openApplyDialog = (row) => {
+  currentPlan.value = row
+  applyForm.selfIntro = ''
+  applyDialogVisible.value = true
+}
+
+const submitApply = () => {
+  if (!applyForm.selfIntro) {
+    ElMessage.warning('请填写自我介绍')
+    return
+  }
+  
+  const postData = {
+    planId: currentPlan.value.planId,
+    userId: user.userId,
+    selfIntro: applyForm.selfIntro,
+    // 防止DB字段非空约束导致的500，传个空字符串
+    resumeFileUrl: '' 
+  }
+
+  request.post('/recruit/apply', postData).then(res => {
+    ElMessage.success('申请提交成功，请耐心等待审核')
+    applyDialogVisible.value = false
+  })
+}
+
+onMounted(() => {
+  loadData()
+})
+</script>
+
+<style scoped>
+.recruit-plan-container {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ebeef5;
+}
+.title-box h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #303133;
+}
+.sub-title {
+  font-size: 13px;
+  color: #909399;
+  margin-top: 5px;
+  display: block;
+}
+</style>

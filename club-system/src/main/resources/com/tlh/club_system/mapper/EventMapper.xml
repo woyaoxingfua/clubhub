@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.EventMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.Event">
+            <id property="eventId" column="event_id" />
+            <result property="clubId" column="club_id" />
+            <result property="title" column="title" />
+            <result property="content" column="content" />
+            <result property="location" column="location" />
+            <result property="budget" column="budget" />
+            <result property="startTime" column="start_time" />
+            <result property="endTime" column="end_time" />
+            <result property="maxPeople" column="max_people" />
+            <result property="auditStatus" column="audit_status" />
+            <result property="auditRemark" column="audit_remark" />
+            <result property="summary" column="summary" />
+            <result property="createTime" column="create_time" />
+        <result column="create_by" jdbcType="BIGINT" property="createBy" />
+        <result column="target_type" jdbcType="INTEGER" property="targetType" />
+        <result column="target_dept_id" jdbcType="INTEGER" property="targetDeptId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        event_id,club_id,title,content,location,budget,
+        start_time,end_time,max_people,audit_status,audit_remark,
+        summary,create_time,create_by,target_type,target_dept_id
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_event
+        where  event_id = #{eventId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_event
+        where  event_id = #{eventId} 
+    </delete>
+    <insert id="insert" keyColumn="event_id" keyProperty="eventId" parameterType="com.tlh.club_system.entity.Event" useGeneratedKeys="true">
+        insert into tb_event
+        ( event_id,club_id,title,content,location,budget,
+        start_time,end_time,max_people,audit_status,audit_remark,
+        summary,create_time)
+        values (#{eventId},#{clubId},#{title},#{content},#{location},#{budget},
+        #{startTime},#{endTime},#{maxPeople},#{auditStatus},#{auditRemark},
+        #{summary},#{createTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="event_id" keyProperty="eventId" parameterType="com.tlh.club_system.entity.Event" useGeneratedKeys="true">
+        insert into tb_event
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="eventId != null">event_id,</if>
+                <if test="clubId != null">club_id,</if>
+                <if test="title != null">title,</if>
+                <if test="content != null">content,</if>
+                <if test="location != null">location,</if>
+                <if test="budget != null">budget,</if>
+                <if test="startTime != null">start_time,</if>
+                <if test="endTime != null">end_time,</if>
+                <if test="maxPeople != null">max_people,</if>
+                <if test="auditStatus != null">audit_status,</if>
+                <if test="auditRemark != null">audit_remark,</if>
+                <if test="summary != null">summary,</if>
+                <if test="createTime != null">create_time,</if>
+                <if test="createBy != null">create_by,</if>
+                <if test="targetType != null">target_type,</if>
+                <if test="targetDeptId != null">target_dept_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="eventId != null">#{eventId},</if>
+                <if test="clubId != null">#{clubId},</if>
+                <if test="title != null">#{title},</if>
+                <if test="content != null">#{content},</if>
+                <if test="location != null">#{location},</if>
+                <if test="budget != null">#{budget},</if>
+                <if test="startTime != null">#{startTime},</if>
+                <if test="endTime != null">#{endTime},</if>
+                <if test="maxPeople != null">#{maxPeople},</if>
+                <if test="auditStatus != null">#{auditStatus},</if>
+                <if test="auditRemark != null">#{auditRemark},</if>
+                <if test="summary != null">#{summary},</if>
+                <if test="createTime != null">#{createTime},</if>
+                <if test="createBy != null">#{createBy,jdbcType=BIGINT},</if>
+                <if test="targetType != null">#{targetType},</if>
+                <if test="targetDeptId != null">#{targetDeptId},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.Event">
+        update tb_event
+        <set>
+                <if test="clubId != null">
+                    club_id = #{clubId},
+                </if>
+                <if test="title != null">
+                    title = #{title},
+                </if>
+                <if test="content != null">
+                    content = #{content},
+                </if>
+                <if test="location != null">
+                    location = #{location},
+                </if>
+                <if test="budget != null">
+                    budget = #{budget},
+                </if>
+                <if test="startTime != null">
+                    start_time = #{startTime},
+                </if>
+                <if test="endTime != null">
+                    end_time = #{endTime},
+                </if>
+                <if test="maxPeople != null">
+                    max_people = #{maxPeople},
+                </if>
+                <if test="auditStatus != null">
+                    audit_status = #{auditStatus},
+                </if>
+                <if test="auditRemark != null">
+                    audit_remark = #{auditRemark},
+                </if>
+                <if test="summary != null">
+                    summary = #{summary},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+                <if test="targetType != null">
+                    target_type = #{targetType},
+                </if>
+                <if test="targetDeptId != null">
+                    target_dept_id = #{targetDeptId},
+                </if>
+        </set>
+        where   event_id = #{eventId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.Event">
+        update tb_event
+        set 
+            club_id =  #{clubId},
+            title =  #{title},
+            content =  #{content},
+            location =  #{location},
+            budget =  #{budget},
+            start_time =  #{startTime},
+            end_time =  #{endTime},
+            max_people =  #{maxPeople},
+            audit_status =  #{auditStatus},
+            audit_remark =  #{auditRemark},
+            summary =  #{summary},
+            create_time =  #{createTime},
+            target_type = #{targetType},
+            target_dept_id = #{targetDeptId}
+        where   event_id = #{eventId} 
+    </update>
+</mapper>

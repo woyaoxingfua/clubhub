@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.ClubMemberMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.ClubMember">
+            <id property="id" column="id" />
+            <result property="clubId" column="club_id" />
+            <result property="userId" column="user_id" />
+            <result property="position" column="position" />
+            <result property="joinTime" column="join_time" />
+            <result property="status" column="status" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,club_id,user_id,position,join_time,status
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_club_member
+        where  id = #{id} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_club_member
+        where  id = #{id} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tlh.club_system.entity.ClubMember" useGeneratedKeys="true">
+        insert into tb_club_member
+        ( id,club_id,user_id,position,join_time,status)
+        values (#{id},#{clubId},#{userId},#{position},#{joinTime},#{status})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tlh.club_system.entity.ClubMember" useGeneratedKeys="true">
+        insert into tb_club_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="clubId != null">club_id,</if>
+                <if test="userId != null">user_id,</if>
+                <if test="position != null">position,</if>
+                <if test="joinTime != null">join_time,</if>
+                <if test="status != null">status,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id},</if>
+                <if test="clubId != null">#{clubId},</if>
+                <if test="userId != null">#{userId},</if>
+                <if test="position != null">#{position},</if>
+                <if test="joinTime != null">#{joinTime},</if>
+                <if test="status != null">#{status},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.ClubMember">
+        update tb_club_member
+        <set>
+                <if test="clubId != null">
+                    club_id = #{clubId},
+                </if>
+                <if test="userId != null">
+                    user_id = #{userId},
+                </if>
+                <if test="position != null">
+                    position = #{position},
+                </if>
+                <if test="joinTime != null">
+                    join_time = #{joinTime},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+        </set>
+        where   id = #{id} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.ClubMember">
+        update tb_club_member
+        set 
+            club_id =  #{clubId},
+            user_id =  #{userId},
+            position =  #{position},
+            join_time =  #{joinTime},
+            status =  #{status}
+        where   id = #{id} 
+    </update>
+</mapper>

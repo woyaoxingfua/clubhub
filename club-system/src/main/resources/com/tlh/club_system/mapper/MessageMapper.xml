@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.MessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.Message">
+        <id property="messageId" column="message_id" />
+        <result property="senderId" column="sender_id" />
+        <result property="receiverId" column="receiver_id" />
+        <result property="clubId" column="club_id" />
+        <result property="subject" column="subject" />
+        <result property="content" column="content" />
+        <result property="isRead" column="is_read" />
+        <result property="sendTime" column="send_time" />
+        <result property="readTime" column="read_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        message_id, sender_id, receiver_id, club_id, subject, content, is_read, send_time, read_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_message
+        where message_id = #{messageId}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_message
+        where message_id = #{messageId}
+    </delete>
+
+    <insert id="insert" keyColumn="message_id" keyProperty="messageId" 
+            parameterType="com.tlh.club_system.entity.Message" useGeneratedKeys="true">
+        insert into tb_message
+        (message_id, sender_id, receiver_id, club_id, subject, content, is_read, send_time, read_time)
+        values (#{messageId}, #{senderId}, #{receiverId}, #{clubId}, #{subject}, #{content}, 
+                #{isRead}, #{sendTime}, #{readTime})
+    </insert>
+
+    <insert id="insertSelective" keyColumn="message_id" keyProperty="messageId" 
+            parameterType="com.tlh.club_system.entity.Message" useGeneratedKeys="true">
+        insert into tb_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">message_id,</if>
+            <if test="senderId != null">sender_id,</if>
+            <if test="receiverId != null">receiver_id,</if>
+            <if test="clubId != null">club_id,</if>
+            <if test="subject != null">subject,</if>
+            <if test="content != null">content,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="sendTime != null">send_time,</if>
+            <if test="readTime != null">read_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="messageId != null">#{messageId},</if>
+            <if test="senderId != null">#{senderId},</if>
+            <if test="receiverId != null">#{receiverId},</if>
+            <if test="clubId != null">#{clubId},</if>
+            <if test="subject != null">#{subject},</if>
+            <if test="content != null">#{content},</if>
+            <if test="isRead != null">#{isRead},</if>
+            <if test="sendTime != null">#{sendTime},</if>
+            <if test="readTime != null">#{readTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.Message">
+        update tb_message
+        <set>
+            <if test="senderId != null">sender_id = #{senderId},</if>
+            <if test="receiverId != null">receiver_id = #{receiverId},</if>
+            <if test="clubId != null">club_id = #{clubId},</if>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="sendTime != null">send_time = #{sendTime},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+        </set>
+        where message_id = #{messageId}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.Message">
+        update tb_message
+        set sender_id = #{senderId},
+            receiver_id = #{receiverId},
+            club_id = #{clubId},
+            subject = #{subject},
+            content = #{content},
+            is_read = #{isRead},
+            send_time = #{sendTime},
+            read_time = #{readTime}
+        where message_id = #{messageId}
+    </update>
+</mapper>

@@ -1,0 +1,59 @@
+fix_president_data.sql 修改说明
+================================
+
+修改时间: 2025-12-26
+修改原因: 解决原SQL文件执行时的数据库名错误和字符编码冲突问题
+
+一、修改内容
+------------
+
+1. 数据库名称
+   原版: USE club_system;
+   修改: USE club_system_db;
+
+2. 数据值从中文改为英文（避免GBK/UTF8编码冲突）
+   
+   职位字段(position):
+   - '社长' → 'president'
+   - '副社长' → 'vice_president'
+   - '部长' → 'department_head'
+   - '成员' → 'member'
+   
+   部门字段(department):
+   - '管理层' → 'admin_dept'
+   
+   状态显示:
+   - '在社' → 'active'
+   - '已离社' → 'inactive'
+
+二、影响范围
+------------
+
+1. 数据库影响:
+   - tb_club_member 表中的 position 和 department 字段值改为英文
+
+2. 后端代码影响:
+   - 需要检查所有判断 position 和 department 的代码
+   - 将中文字符串判断改为英文字符串
+   
+   例如:
+   if ("社长".equals(position)) → if ("president".equals(position))
+
+3. 前端影响:
+   - 如果前端直接显示数据库字段值，需要添加翻译映射
+
+三、执行结果
+------------
+
+执行成功后:
+- 2个社团的社长记录已修复
+- position = 'president'
+- role_group = 'admin'
+- status = 1 (active)
+
+四、注意事项
+------------
+
+1. 执行SQL前建议备份数据
+2. 后续新增社长时，应使用英文值 'president'
+3. 如需保持中文，需解决字符编码问题(执行前SET NAMES utf8mb4)

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.FileMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.File">
+            <id property="fileId" column="file_id" />
+            <result property="ownerId" column="owner_id" />
+            <result property="category" column="category" />
+            <result property="fileName" column="file_name" />
+            <result property="fileUrl" column="file_url" />
+            <result property="uploadTime" column="upload_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        file_id,owner_id,category,file_name,file_url,upload_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_file
+        where  file_id = #{fileId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_file
+        where  file_id = #{fileId} 
+    </delete>
+    <insert id="insert" keyColumn="file_id" keyProperty="fileId" parameterType="com.tlh.club_system.entity.File" useGeneratedKeys="true">
+        insert into tb_file
+        ( file_id,owner_id,category,file_name,file_url,upload_time)
+        values (#{fileId},#{ownerId},#{category},#{fileName},#{fileUrl},#{uploadTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="file_id" keyProperty="fileId" parameterType="com.tlh.club_system.entity.File" useGeneratedKeys="true">
+        insert into tb_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="fileId != null">file_id,</if>
+                <if test="ownerId != null">owner_id,</if>
+                <if test="category != null">category,</if>
+                <if test="fileName != null">file_name,</if>
+                <if test="fileUrl != null">file_url,</if>
+                <if test="uploadTime != null">upload_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="fileId != null">#{fileId},</if>
+                <if test="ownerId != null">#{ownerId},</if>
+                <if test="category != null">#{category},</if>
+                <if test="fileName != null">#{fileName},</if>
+                <if test="fileUrl != null">#{fileUrl},</if>
+                <if test="uploadTime != null">#{uploadTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.File">
+        update tb_file
+        <set>
+                <if test="ownerId != null">
+                    owner_id = #{ownerId},
+                </if>
+                <if test="category != null">
+                    category = #{category},
+                </if>
+                <if test="fileName != null">
+                    file_name = #{fileName},
+                </if>
+                <if test="fileUrl != null">
+                    file_url = #{fileUrl},
+                </if>
+                <if test="uploadTime != null">
+                    upload_time = #{uploadTime},
+                </if>
+        </set>
+        where   file_id = #{fileId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.File">
+        update tb_file
+        set 
+            owner_id =  #{ownerId},
+            category =  #{category},
+            file_name =  #{fileName},
+            file_url =  #{fileUrl},
+            upload_time =  #{uploadTime}
+        where   file_id = #{fileId} 
+    </update>
+</mapper>

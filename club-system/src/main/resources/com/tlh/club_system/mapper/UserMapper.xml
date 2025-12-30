@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.User">
+            <id property="userId" column="user_id" />
+            <result property="username" column="username" />
+            <result property="password" column="password" />
+            <result property="realName" column="real_name" />
+            <result property="roleKey" column="role_key" />
+            <result property="deptId" column="dept_id" />
+            <result property="phone" column="phone" />
+            <result property="email" column="email" />
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,username,password,real_name,role_key,dept_id,
+        phone,email,status,create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sys_user
+        where  user_id = #{userId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from sys_user
+        where  user_id = #{userId} 
+    </delete>
+    <insert id="insert" keyColumn="user_id" keyProperty="userId" parameterType="com.tlh.club_system.entity.User" useGeneratedKeys="true">
+        insert into sys_user
+        ( user_id,username,password,real_name,role_key,dept_id,
+        phone,email,status,create_time)
+        values (#{userId},#{username},#{password},#{realName},#{roleKey},#{deptId},
+        #{phone},#{email},#{status},#{createTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="user_id" keyProperty="userId" parameterType="com.tlh.club_system.entity.User" useGeneratedKeys="true">
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="userId != null">user_id,</if>
+                <if test="username != null">username,</if>
+                <if test="password != null">password,</if>
+                <if test="realName != null">real_name,</if>
+                <if test="roleKey != null">role_key,</if>
+                <if test="deptId != null">dept_id,</if>
+                <if test="phone != null">phone,</if>
+                <if test="email != null">email,</if>
+                <if test="status != null">status,</if>
+                <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="userId != null">#{userId},</if>
+                <if test="username != null">#{username},</if>
+                <if test="password != null">#{password},</if>
+                <if test="realName != null">#{realName},</if>
+                <if test="roleKey != null">#{roleKey},</if>
+                <if test="deptId != null">#{deptId},</if>
+                <if test="phone != null">#{phone},</if>
+                <if test="email != null">#{email},</if>
+                <if test="status != null">#{status},</if>
+                <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.User">
+        update sys_user
+        <set>
+                <if test="username != null">
+                    username = #{username},
+                </if>
+                <if test="password != null">
+                    password = #{password},
+                </if>
+                <if test="realName != null">
+                    real_name = #{realName},
+                </if>
+                <if test="roleKey != null">
+                    role_key = #{roleKey},
+                </if>
+                <if test="deptId != null">
+                    dept_id = #{deptId},
+                </if>
+                <if test="phone != null">
+                    phone = #{phone},
+                </if>
+                <if test="email != null">
+                    email = #{email},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+        </set>
+        where   user_id = #{userId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.User">
+        update sys_user
+        set 
+            username =  #{username},
+            password =  #{password},
+            real_name =  #{realName},
+            role_key =  #{roleKey},
+            dept_id =  #{deptId},
+            phone =  #{phone},
+            email =  #{email},
+            status =  #{status},
+            create_time =  #{createTime}
+        where   user_id = #{userId} 
+    </update>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sys_user
+    </select>
+</mapper>

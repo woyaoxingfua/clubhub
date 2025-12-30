@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.ClubMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.Club">
+            <id property="clubId" column="club_id" />
+            <result property="clubName" column="club_name" />
+            <result property="category" column="category" />
+            <result property="logoUrl" column="logo_url" />
+            <result property="description" column="description" />
+            <result property="honors" column="honors" />
+            <result property="presidentId" column="president_id" />
+            <result property="advisorId" column="advisor_id" />
+            <result property="deptId" column="dept_id" />
+            <result property="balance" column="balance" />
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        club_id,club_name,category,logo_url,description,honors,president_id,
+        advisor_id,dept_id,balance,status,create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_club
+        where  club_id = #{clubId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_club
+        where  club_id = #{clubId} 
+    </delete>
+    <insert id="insert" keyColumn="club_id" keyProperty="clubId" parameterType="com.tlh.club_system.entity.Club" useGeneratedKeys="true">
+        insert into tb_club
+        ( club_id,club_name,category,logo_url,description,honors,president_id,
+        advisor_id,dept_id,balance,status,create_time)
+        values (#{clubId},#{clubName},#{category},#{logoUrl},#{description},#{honors},#{presidentId},
+        #{advisorId},#{deptId},#{balance},#{status},#{createTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="club_id" keyProperty="clubId" parameterType="com.tlh.club_system.entity.Club" useGeneratedKeys="true">
+        insert into tb_club
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="clubId != null">club_id,</if>
+                <if test="clubName != null">club_name,</if>
+                <if test="category != null">category,</if>
+                <if test="logoUrl != null">logo_url,</if>
+                <if test="description != null">description,</if>
+                <if test="honors != null">honors,</if>
+                <if test="presidentId != null">president_id,</if>
+                <if test="advisorId != null">advisor_id,</if>
+                <if test="deptId != null">dept_id,</if>
+                <if test="balance != null">balance,</if>
+                <if test="status != null">status,</if>
+                <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="clubId != null">#{clubId},</if>
+                <if test="clubName != null">#{clubName},</if>
+                <if test="category != null">#{category},</if>
+                <if test="logoUrl != null">#{logoUrl},</if>
+                <if test="description != null">#{description},</if>
+                <if test="honors != null">#{honors},</if>
+                <if test="presidentId != null">#{presidentId},</if>
+                <if test="advisorId != null">#{advisorId},</if>
+                <if test="deptId != null">#{deptId},</if>
+                <if test="balance != null">#{balance},</if>
+                <if test="status != null">#{status},</if>
+                <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.Club">
+        update tb_club
+        <set>
+                <if test="clubName != null">
+                    club_name = #{clubName},
+                </if>
+                <if test="category != null">
+                    category = #{category},
+                </if>
+                <if test="logoUrl != null">
+                    logo_url = #{logoUrl},
+                </if>
+                <if test="description != null">
+                    description = #{description},
+                </if>
+                <if test="honors != null">
+                    honors = #{honors},
+                </if>
+                <if test="presidentId != null">
+                    president_id = #{presidentId},
+                </if>
+                <if test="advisorId != null">
+                    advisor_id = #{advisorId},
+                </if>
+                <if test="deptId != null">
+                    dept_id = #{deptId},
+                </if>
+                <if test="balance != null">
+                    balance = #{balance},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+        </set>
+        where   club_id = #{clubId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.Club">
+        update tb_club
+        set 
+            club_name =  #{clubName},
+            category =  #{category},
+            logo_url =  #{logoUrl},
+            description =  #{description},
+            honors =  #{honors},
+            president_id =  #{presidentId},
+            advisor_id =  #{advisorId},
+            dept_id =  #{deptId},
+            balance =  #{balance},
+            status =  #{status},
+            create_time =  #{createTime}
+        where   club_id = #{clubId} 
+    </update>
+</mapper>

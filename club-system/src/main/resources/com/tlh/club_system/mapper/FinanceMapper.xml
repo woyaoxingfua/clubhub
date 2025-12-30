@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.FinanceMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.Finance">
+            <id property="financeId" column="finance_id" />
+            <result property="clubId" column="club_id" />
+            <result property="eventId" column="event_id" />
+            <result property="type" column="type" />
+            <result property="amount" column="amount" />
+            <result property="description" column="description" />
+            <result property="proofUrl" column="proof_url" />
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        finance_id,club_id,event_id,type,amount,description,
+        proof_url,status,create_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_finance
+        where  finance_id = #{financeId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_finance
+        where  finance_id = #{financeId} 
+    </delete>
+    <insert id="insert" keyColumn="finance_id" keyProperty="financeId" parameterType="com.tlh.club_system.entity.Finance" useGeneratedKeys="true">
+        insert into tb_finance
+        ( finance_id,club_id,event_id,type,amount,description,
+        proof_url,status,create_time)
+        values (#{financeId},#{clubId},#{eventId},#{type},#{amount},#{description},
+        #{proofUrl},#{status},#{createTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="finance_id" keyProperty="financeId" parameterType="com.tlh.club_system.entity.Finance" useGeneratedKeys="true">
+        insert into tb_finance
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="financeId != null">finance_id,</if>
+                <if test="clubId != null">club_id,</if>
+                <if test="eventId != null">event_id,</if>
+                <if test="type != null">type,</if>
+                <if test="amount != null">amount,</if>
+                <if test="description != null">description,</if>
+                <if test="proofUrl != null">proof_url,</if>
+                <if test="status != null">status,</if>
+                <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="financeId != null">#{financeId},</if>
+                <if test="clubId != null">#{clubId},</if>
+                <if test="eventId != null">#{eventId},</if>
+                <if test="type != null">#{type},</if>
+                <if test="amount != null">#{amount},</if>
+                <if test="description != null">#{description},</if>
+                <if test="proofUrl != null">#{proofUrl},</if>
+                <if test="status != null">#{status},</if>
+                <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.Finance">
+        update tb_finance
+        <set>
+                <if test="clubId != null">
+                    club_id = #{clubId},
+                </if>
+                <if test="eventId != null">
+                    event_id = #{eventId},
+                </if>
+                <if test="type != null">
+                    type = #{type},
+                </if>
+                <if test="amount != null">
+                    amount = #{amount},
+                </if>
+                <if test="description != null">
+                    description = #{description},
+                </if>
+                <if test="proofUrl != null">
+                    proof_url = #{proofUrl},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime},
+                </if>
+        </set>
+        where   finance_id = #{financeId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.Finance">
+        update tb_finance
+        set 
+            club_id =  #{clubId},
+            event_id =  #{eventId},
+            type =  #{type},
+            amount =  #{amount},
+            description =  #{description},
+            proof_url =  #{proofUrl},
+            status =  #{status},
+            create_time =  #{createTime}
+        where   finance_id = #{financeId} 
+    </update>
+</mapper>

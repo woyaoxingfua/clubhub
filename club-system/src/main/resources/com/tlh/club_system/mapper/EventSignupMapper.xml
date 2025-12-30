@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tlh.club_system.mapper.EventSignupMapper">
+
+    <resultMap id="BaseResultMap" type="com.tlh.club_system.entity.EventSignup">
+            <id property="signupId" column="signup_id" />
+            <result property="eventId" column="event_id" />
+            <result property="userId" column="user_id" />
+            <result property="status" column="status" />
+            <result property="signupTime" column="signup_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        signup_id,event_id,user_id,status,signup_time
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_event_signup
+        where  signup_id = #{signupId} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_event_signup
+        where  signup_id = #{signupId} 
+    </delete>
+    <insert id="insert" keyColumn="signup_id" keyProperty="signupId" parameterType="com.tlh.club_system.entity.EventSignup" useGeneratedKeys="true">
+        insert into tb_event_signup
+        ( signup_id,event_id,user_id,status,signup_time)
+        values (#{signupId},#{eventId},#{userId},#{status},#{signupTime})
+    </insert>
+    <insert id="insertSelective" keyColumn="signup_id" keyProperty="signupId" parameterType="com.tlh.club_system.entity.EventSignup" useGeneratedKeys="true">
+        insert into tb_event_signup
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="signupId != null">signup_id,</if>
+                <if test="eventId != null">event_id,</if>
+                <if test="userId != null">user_id,</if>
+                <if test="status != null">status,</if>
+                <if test="signupTime != null">signup_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="signupId != null">#{signupId},</if>
+                <if test="eventId != null">#{eventId},</if>
+                <if test="userId != null">#{userId},</if>
+                <if test="status != null">#{status},</if>
+                <if test="signupTime != null">#{signupTime},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tlh.club_system.entity.EventSignup">
+        update tb_event_signup
+        <set>
+                <if test="eventId != null">
+                    event_id = #{eventId},
+                </if>
+                <if test="userId != null">
+                    user_id = #{userId},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="signupTime != null">
+                    signup_time = #{signupTime},
+                </if>
+        </set>
+        where   signup_id = #{signupId} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tlh.club_system.entity.EventSignup">
+        update tb_event_signup
+        set 
+            event_id =  #{eventId},
+            user_id =  #{userId},
+            status =  #{status},
+            signup_time =  #{signupTime}
+        where   signup_id = #{signupId} 
+    </update>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_event_signup
+    </select>
+</mapper>
