@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * AI 辅助功能控制器
- */
 @RestController
 @RequestMapping("/api/ai")
 @CrossOrigin
@@ -43,13 +40,9 @@ public class AiController {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * AI 润色活动内容
-     * @param params { "title": "...", "content": "..." }
-     */
     @PostMapping("/polish")
     public Result<String> polishContent(@RequestBody Map<String, String> params) {
-        UserContext.getCurrentUser(); // 确保已登录（可选）
+        UserContext.getCurrentUser();
 
         String title = params.getOrDefault("title", "未命名活动");
         String content = params.getOrDefault("content", "");
@@ -59,11 +52,9 @@ public class AiController {
         }
 
         try {
-            // 构造 Prompt
             String systemPrompt = "你是一个高校社团管理系统的智能助手。请帮我润色以下社团活动的描述，使其更加吸引人、专业且充满活力。请直接返回润色后的内容，不要包含任何客套话或额外说明。";
             String userPrompt = String.format("活动主题：%s\n\n草稿内容：%s", title, content);
 
-            // 构造 OpenAI 格式请求体
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", apiModel);
             requestBody.put("messages", List.of(
@@ -74,7 +65,6 @@ public class AiController {
 
             String jsonBody = objectMapper.writeValueAsString(requestBody);
 
-            // 发送请求
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(apiUrl))
                     .header("Content-Type", "application/json")
@@ -86,17 +76,14 @@ public class AiController {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // 解析响应
                 JsonNode rootNode = objectMapper.readTree(response.body());
                 String polishedText = rootNode.path("choices").get(0).path("message").path("content").asText();
                 return Result.success("AI 润色成功", polishedText);
             } else {
-                System.err.println("AI API Error: " + response.body());
                 return Result.error("AI 服务响应异常: " + response.statusCode());
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             return Result.error("AI 服务调用失败: " + e.getMessage());
         }
     }

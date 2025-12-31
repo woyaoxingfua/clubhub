@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,27 +29,20 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<Notice> getList(Notice notice) {
-        // 使用关联查询，获取社团名称和发布人姓名
         List<Notice> allNotices = noticeMapper.selectAllWithNames();
         
-        // 根据当前用户权限过滤
         User currentUser = UserContext.getCurrentUser();
-        if (currentUser == null) {
+        if (currentUser == null || isAdmin(currentUser)) {
             return allNotices;
         }
         
-        // 管理员可以看所有公告
-        if (isAdmin(currentUser)) {
-            return allNotices;
-        }
-        
-        // 社长可以看：全校公告 + 自己社团的公告
-        List<Club> myClubs = clubMapper.selectByPresidentId(Long.valueOf(currentUser.getUserId()));
-        List<Integer> myClubIds = myClubs.stream().map(Club::getClubId).collect(Collectors.toList());
+        Set<Integer> myClubIds = clubMapper.selectByPresidentId(Long.valueOf(currentUser.getUserId()))
+                .stream()
+                .map(Club::getClubId)
+                .collect(Collectors.toSet());
         
         return allNotices.stream()
-                .filter(n -> n.getTargetType() == 0 || // 全校可见
-                        (n.getTargetType() == 2 && myClubIds.contains(n.getClubId()))) // 本社可见且是我的社团
+                .filter(n -> isVisible(n, myClubIds))
                 .collect(Collectors.toList());
     }
 
@@ -64,22 +59,15 @@ public class NoticeServiceImpl implements NoticeService {
             throw new RuntimeException("请先登录");
         }
         
-        // 设置发布人
         notice.setPublisherId(currentUser.getUserId());
-        
-        // 设置发布时间
         if (notice.getPublishTime() == null) {
             notice.setPublishTime(LocalDateTime.now());
         }
-        
-        // 设置默认不置顶
         if (notice.getIsPinned() == null) {
             notice.setIsPinned(0);
         }
         
-        // 权限校验
         if (notice.getTargetType() == 2) {
-            // 社团公告：检查是否是该社团的社长或管理员
             if (!isAdmin(currentUser)) {
                 Club club = clubMapper.selectByPrimaryKey(Long.valueOf(notice.getClubId()));
                 if (club == null || !club.getPresidentId().equals(currentUser.getUserId())) {
@@ -87,7 +75,6 @@ public class NoticeServiceImpl implements NoticeService {
                 }
             }
         } else {
-            // 校级或院系公告：只有管理员可以发布
             if (!isAdmin(currentUser)) {
                 throw new RuntimeException("权限不足：只有管理员可以发布校级或院系公告");
             }
@@ -104,7 +91,6 @@ public class NoticeServiceImpl implements NoticeService {
             throw new RuntimeException("请先登录");
         }
         
-        // 权限校验：管理员或公告发布人
         Notice existingNotice = noticeMapper.selectByPrimaryKey(Long.valueOf(notice.getNoticeId()));
         if (existingNotice == null) {
             throw new RuntimeException("公告不存在");
@@ -125,7 +111,6 @@ public class NoticeServiceImpl implements NoticeService {
             throw new RuntimeException("请先登录");
         }
         
-        // 权限校验
         Notice existingNotice = noticeMapper.selectByPrimaryKey(id);
         if (existingNotice == null) {
             throw new RuntimeException("公告不存在");
@@ -138,9 +123,6 @@ public class NoticeServiceImpl implements NoticeService {
         noticeMapper.deleteByPrimaryKey(id);
     }
     
-    /**
-     * 置顶/取消置顶
-     */
     @Override
     public Result<String> pin(Integer noticeId, Integer isPinned) {
         User currentUser = UserContext.getCurrentUser();
@@ -148,7 +130,6 @@ public class NoticeServiceImpl implements NoticeService {
             return Result.error("请先登录");
         }
         
-        // 只有管理员可以置顶
         if (!isAdmin(currentUser)) {
             return Result.error("权限不足：只有管理员可以置顶公告");
         }
@@ -161,5 +142,12 @@ public class NoticeServiceImpl implements NoticeService {
         if (user == null) return false;
         String role = user.getRoleKey();
         return "SYS_ADMIN".equals(role) || "DEPT_ADMIN".equals(role);
+    }
+
+    private boolean isVisible(Notice notice, Set<Integer> myClubIds) {
+        // 全校可见
+        if (notice.getTargetType() == 0) return true;
+        // 社团公告且是我的社团
+        return notice.getTargetType() == 2 && myClubIds.contains(notice.getClubId());
     }
 }

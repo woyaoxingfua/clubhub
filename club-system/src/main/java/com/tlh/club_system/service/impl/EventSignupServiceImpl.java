@@ -27,7 +27,7 @@ public class EventSignupServiceImpl implements EventSignupService {
         signup.setEventId(eventId);
         signup.setUserId(userId);
         signup.setSignupTime(LocalDateTime.now());
-        signup.setStatus(0); // 默认 0-已提交报名(待确认)
+        signup.setStatus(0);
 
         eventSignupMapper.insertSelective(signup);
         return Result.success("报名成功");
@@ -35,14 +35,12 @@ public class EventSignupServiceImpl implements EventSignupService {
 
     @Override
     public Result<String> cancel(Integer signupId) {
-        // 实际逻辑可能需要校验当前用户是否有权限删除
         eventSignupMapper.deleteByPrimaryKey(Long.valueOf(signupId));
         return Result.success("已取消报名");
     }
 
     @Override
     public List<EventSignup> listByEvent(Integer eventId) {
-        // 临时使用内存过滤，建议优化 Mapper XML 增加 selectByEventId
         List<EventSignup> all = eventSignupMapper.selectAll();
         return all.stream()
                 .filter(s -> s.getEventId().equals(eventId))
@@ -51,7 +49,6 @@ public class EventSignupServiceImpl implements EventSignupService {
 
     @Override
     public List<EventSignup> listByUser(Integer userId) {
-        // 临时使用内存过滤
         List<EventSignup> all = eventSignupMapper.selectAll();
         return all.stream()
                 .filter(s -> s.getUserId().equals(userId))

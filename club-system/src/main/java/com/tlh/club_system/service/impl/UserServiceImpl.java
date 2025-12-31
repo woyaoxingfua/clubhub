@@ -63,23 +63,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) {
-        // 检查用户名是否已存在
         if (isUsernameExists(user.getUsername())) {
             return null;
         }
         
-        // 设置默认值
         if (user.getRoleKey() == null || user.getRoleKey().isEmpty()) {
-            user.setRoleKey("STUDENT"); // 默认为学生角色
+            user.setRoleKey("STUDENT");
         }
         if (user.getStatus() == null) {
-            user.setStatus(1); // 默认启用
+            user.setStatus(1);
         }
         
-        // 插入用户
         int result = userMapper.insertSelective(user);
         if (result > 0) {
-            // 返回插入后的用户（需要重新查询以获取自动生成的ID）
             return userMapper.selectByUsername(user.getUsername());
         }
         return null;

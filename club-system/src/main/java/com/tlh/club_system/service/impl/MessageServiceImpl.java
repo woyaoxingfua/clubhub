@@ -13,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 站内信服务实现类
- */
 @Service
 public class MessageServiceImpl implements MessageService {
 
@@ -30,7 +27,6 @@ public class MessageServiceImpl implements MessageService {
             return Result.error("请先登录");
         }
 
-        // 参数校验
         if (message.getReceiverId() == null) {
             return Result.error("请选择收件人");
         }
@@ -38,12 +34,10 @@ public class MessageServiceImpl implements MessageService {
             return Result.error("消息内容不能为空");
         }
 
-        // 设置发送人和时间
         message.setSenderId(currentUser.getUserId());
         message.setSendTime(LocalDateTime.now());
-        message.setIsRead(0); // 默认未读
+        message.setIsRead(0);
 
-        // 如果没有主题，使用默认主题
         if (message.getSubject() == null || message.getSubject().trim().isEmpty()) {
             message.setSubject("新消息");
         }
@@ -70,13 +64,11 @@ public class MessageServiceImpl implements MessageService {
             return Result.error("请先登录");
         }
 
-        // 查询消息
         Message message = messageMapper.selectByPrimaryKey(Long.valueOf(messageId));
         if (message == null) {
             return Result.error("消息不存在");
         }
 
-        // 权限校验：只有接收人才能标记为已读
         if (!message.getReceiverId().equals(currentUser.getUserId())) {
             return Result.error("权限不足：只能标记自己收到的消息");
         }
@@ -109,13 +101,11 @@ public class MessageServiceImpl implements MessageService {
             return Result.error("请先登录");
         }
 
-        // 查询消息
         Message message = messageMapper.selectByPrimaryKey(Long.valueOf(messageId));
         if (message == null) {
             return Result.error("消息不存在");
         }
 
-        // 权限校验：只有发送人或接收人才能删除
         if (!message.getSenderId().equals(currentUser.getUserId()) &&
             !message.getReceiverId().equals(currentUser.getUserId())) {
             return Result.error("权限不足：只能删除自己的消息");
